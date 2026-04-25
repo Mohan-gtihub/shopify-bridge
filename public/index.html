@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Products — Shopify Bridge</title>
+  <title>Shopify Bridge — Developer Console</title>
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
@@ -15,7 +15,8 @@
     </div>
     <nav class="tabs">
       <button class="tab active" data-tab="products">Products</button>
-      <a class="tab" href="api-docs.html">API Docs</a>
+      <button class="tab" data-tab="explorer">API Explorer</button>
+      <a class="tab" href="api-docs.html">Reference</a>
       <button class="tab" data-tab="analytics">Analytics</button>
     </nav>
     <div class="header-spacer"></div>
@@ -28,7 +29,8 @@
   </header>
 
   <main>
-    <div id="view-products" class="view active" style="display:grid;gap:20px;">
+    <!-- ============== PRODUCTS ============== -->
+    <div id="view-products" class="view active" style="display:grid;gap:18px;">
       <section class="panel">
         <div class="search-bar">
           <div class="field grow">
@@ -103,12 +105,67 @@
       </section>
     </div>
 
+    <!-- ============== API EXPLORER ============== -->
+    <div id="view-explorer" class="view" style="display:none;">
+      <section class="system-info">
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Base URL</label>
+            <div class="key-val">
+              <code id="info-base-url">http://localhost:3000</code>
+              <span class="env-switcher" title="Switch environment">
+                <select id="env-select">
+                  <option value="local">local</option>
+                  <option value="prod">prod</option>
+                  <option value="custom">custom…</option>
+                </select>
+              </span>
+            </div>
+          </div>
+          <div class="info-item">
+            <label>API Key — X-Bridge-API-Key</label>
+            <div class="key-val">
+              <code id="info-api-key" data-hidden="true" data-value="">••••••••••••••••</code>
+              <span class="actions">
+                <button class="small ghost" id="btn-toggle-eye">Show</button>
+                <button class="small ghost" id="btn-copy-key">Copy</button>
+              </span>
+            </div>
+          </div>
+          <div class="info-item">
+            <label>Resources</label>
+            <div class="info-actions">
+              <a href="/api/openapi.json" target="_blank"><button class="small muted">OpenAPI 3.0</button></a>
+              <button class="small muted" id="btn-postman">Postman Collection</button>
+              <a href="api-docs.html"><button class="small muted">Reference Docs</button></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="exp-shell">
+        <aside class="exp-sidebar">
+          <div class="exp-search">
+            <input type="search" id="exp-search-input" placeholder="Filter endpoints… (e.g. variant)" />
+          </div>
+          <div id="exp-list" class="endpoint-list">
+            <div class="loading">Loading endpoints…</div>
+          </div>
+        </aside>
+
+        <div class="exp-workspace" id="exp-workspace">
+          <div class="panel"><div class="loading">Select an endpoint from the left to begin.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== ANALYTICS ============== -->
     <div id="view-analytics" class="view" style="display:none;">
       <section class="panel">
         <h2>Rate Limit Usage</h2>
         <div class="row-actions">
           <button type="button" id="ana-refresh" class="muted">Refresh now</button>
-          <span id="ana-meta" style="color: var(--muted); font-size: 12px;"></span>
+          <span id="ana-meta" style="color: var(--ink-3); font-size: 12px;"></span>
         </div>
         <div class="kpis">
           <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value" id="kpi-available">—</div></div>
@@ -141,9 +198,10 @@
 
   <style>
     .view { display: none; }
-    .view.active { display: grid; gap: 20px; }
+    .view.active { display: grid; gap: 18px; }
   </style>
   <script src="js/common.js"></script>
   <script src="js/list.js"></script>
+  <script src="js/explorer.js"></script>
 </body>
 </html>

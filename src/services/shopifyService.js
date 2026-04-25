@@ -373,7 +373,9 @@ class ShopifyService {
       );
       productId = lookup.productVariant && lookup.productVariant.product && lookup.productVariant.product.id;
       if (!productId) {
-        throw new Error(`updateVariant: could not resolve parent product for variant ${variant.id}`);
+        const e = new Error(`updateVariant: variant ${variant.id} not found (no parent product)`);
+        e.status = 404; e.code = 'VARIANT_NOT_FOUND';
+        throw e;
       }
     }
     const v = { id: variant.id };

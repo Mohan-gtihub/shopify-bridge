@@ -146,15 +146,49 @@ async function loadShopHeader() {
   const cur = document.getElementById('shop-currency');
   const conn = document.getElementById('conn');
   if (!target && !cur && !conn) return;
+
   try {
-    const d = await fetchJson('/api/admin/shop');
-    if (target && d.shop && d.shop.name) target.textContent = d.shop.name;
-    if (cur && d.shop && d.shop.currencyCode) cur.textContent = d.shop.currencyCode;
-    if (d.shop && d.shop.currencyCode) window.__SHOP_CURRENCY = d.shop.currencyCode;
-    if (conn) { conn.classList.remove('off'); conn.textContent = 'Connected'; }
-  } catch (_) {
-    if (target) target.textContent = 'not connected';
-    if (conn) { conn.classList.add('off'); conn.textContent = 'Offline'; }
+    const status = await fetchJson('/api/status');
+    
+    if (status.connected) {
+      // Token is healthy
+      const d = await fetchJson('/api/admin/shop');
+      if (target && d.shop && d.shop.name) target.textContent = d.shop.name;
+      if (cur && d.shop && d.shop.currencyCode) cur.textContent = d.shop.currencyCode;
+      if (d.shop && d.shop.currencyCode) window.__SHOP_CURRENCY = d.shop.currencyCode;
+      
+      const baseUrlEl = document.getElementById('info-base-url');
+      const apiKeyEl = document.getElementById('info-api-key');
+      const copyBtn = document.getElementById('btn-copy-key');
+      if (baseUrlEl) baseUrlEl.textContent = status.baseUrl;
+      if (apiKeyEl) {
+        apiKeyEl.setAttribute('data-value', status.bridgeApiKey || '');
+        // Keep the hidden mask by default
+        apiKeyEl.textContent = '••••••';
+        if (copyBtn) copyBtn.onclick = () => {
+          navigator.clipboard.writeText(status.bridgeApiKey);
+          toast('API Key copied to clipboard', 'ok');
+        };
+      }
+
+      conn.className = 'conn';
+      conn.textContent = 'Connected';
+      conn.onclick = () => toast(`Connected to ${status.shop}`, 'ok');
+      conn.title = `Last fetched: ${new Date(status.fetchedAt).toLocaleString()}`;
+    } else {
+      // Token is invalid or missing
+      throw new Error(status.reason || 'DISCONNECTED');
+    }
+  } catch (err) {
+    if (target) target.textContent = 're-auth required';
+    conn.className = 'conn off btn-reauth';
+    conn.textContent = 'Reconnect to Shopify';
+    conn.onclick = () => {
+      window.location.href = '/auth';
+    };
+    conn.title = err.message === 'INVALID_TOKEN' 
+      ? 'Your Shopify session has expired. Click to refresh.' 
+      : 'No active Shopify connection found.';
   }
 }
 loadShopHeader();

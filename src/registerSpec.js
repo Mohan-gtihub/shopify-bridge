@@ -52,39 +52,11 @@ register({
   responseExample: { summary: { totalCalls: 12, totalActualCost: 144, avgDurationMs: 230 }, history: [], operations: [], throttle: {} },
 });
 
-// ===== unified shopify endpoints =====
+// ===== status =====
 register({
-  method: 'GET', path: '/api/shopify', tags: ['shopify'],
-  summary: 'Fetch all products + collections (paginated server-side)',
-  responseExample: { products: [], collections: [], meta: { fetched_at: '2026-04-25T00:00:00Z' } },
-});
-register({
-  method: 'GET', path: '/api/shopify/product/:id', tags: ['shopify'],
-  params: { id: { type: 'string', required: true, description: 'gid or numeric id' } },
-  summary: 'Fetch one full product (PRODUCT_FIELDS shape)',
-  responseExample: { id: 'gid://shopify/Product/1', title: 'Tee', variants: [], images: [] },
-});
-register({
-  method: 'GET', path: '/api/shopify/collection/:id', tags: ['shopify'],
-  params: { id: { type: 'string', required: true, description: 'gid or numeric id' } },
-  summary: 'Fetch one full collection',
-  responseExample: { id: 'gid://shopify/Collection/1', title: 'Sale' },
-});
-register({
-  method: 'POST', path: '/api/shopify/update', tags: ['shopify'],
-  summary: 'Unified write — update a product or collection',
-  body: {
-    type: { type: 'string', required: true, description: 'product | collection' },
-    id:   { type: 'string', required: true, description: 'gid or numeric id' },
-    data: { type: 'object', required: true, description: 'Fields to update; supports imagesToCreate/imagesToUpdate/imagesToDelete/variants for products' },
-  },
-  responseExample: { success: true, result: { id: 'gid://shopify/Product/1' } },
-});
-register({
-  method: 'POST', path: '/api/shopify/bulk-update', tags: ['shopify'],
-  summary: 'Apply an array of updates concurrently',
-  body: { updates: { type: 'array', required: true, description: 'Each item: { type, id, data }' } },
-  responseExample: { total: 2, succeeded: 2, failed: 0, results: [] },
+  method: 'GET', path: '/api/status', tags: ['system'],
+  summary: 'Auth/connectivity check + base URL + agent API key (only when SESSION ok)',
+  responseExample: { connected: true, baseUrl: 'http://localhost:3000', shop: 'foo.myshopify.com', bridgeApiKey: '••••', fetchedAt: '2026-04-25T00:00:00Z' },
 });
 
 // ===== docs =====

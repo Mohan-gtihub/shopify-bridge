@@ -12,10 +12,19 @@ const { flattenNode, flattenEdges } = require('../utils/transformer');
 const router = express.Router();
 
 // ---- middleware ----
-router.use((req, _res, next) => {
+router.use((req, res, next) => {
+  // 1. Check for Agent/MCP API Key first
+  const agentKey = req.get('X-Bridge-API-Key');
+  if (agentKey && agentKey === process.env.BRIDGE_API_KEY && process.env.SHOP && process.env.SHOPIFY_ACCESS_TOKEN) {
+    req.shopifyService = new ShopifyService(process.env.SHOP, process.env.SHOPIFY_ACCESS_TOKEN);
+    req.shopifySession = { shop: process.env.SHOP, token: process.env.SHOPIFY_ACCESS_TOKEN, source: 'key' };
+    return next();
+  }
+
+  // 2. Fallback to browser session
   const session = getSession();
   if (!session || !session.token) {
-    return next(new BridgeError('No Shopify session. Authenticate at /auth.', { status: 401, code: 'UNAUTHORIZED' }));
+    return next(new BridgeError('No Shopify session. Authenticate at /auth or provide X-Bridge-API-Key.', { status: 401, code: 'UNAUTHORIZED' }));
   }
   req.shopifyService = new ShopifyService(session.shop, session.token);
   req.shopifySession = session;

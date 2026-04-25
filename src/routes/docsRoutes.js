@@ -1,5 +1,5 @@
 const express = require('express');
-const { getSpec } = require('../apiSpec');
+const { getSpec, convertToOpenAPI } = require('../apiSpec');
 const { getSession } = require('../utils/storage');
 
 const router = express.Router();
@@ -14,6 +14,13 @@ router.get('/_docs', (_req, res) => {
     shop: session ? session.shop : null,
     apiVersion: API_VERSION,
   });
+});
+
+router.get('/openapi.json', (req, res) => {
+  const host = req.get('host');
+  const proto = req.protocol;
+  const spec = convertToOpenAPI(`${proto}://${host}`);
+  res.json(spec);
 });
 
 module.exports = router;

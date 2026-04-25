@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>API Docs — Shopify Bridge</title>
+  <title>API Reference — Shopify Bridge</title>
   <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
@@ -15,7 +15,8 @@
     </div>
     <nav class="tabs">
       <a class="tab" href="index.html">Products</a>
-      <a class="tab active" href="api-docs.html">API Docs</a>
+      <a class="tab" href="index.html#explorer" id="tab-explorer-link">API Explorer</a>
+      <a class="tab active" href="api-docs.html">Reference</a>
       <a class="tab" href="index.html#analytics">Analytics</a>
     </nav>
     <div class="header-spacer"></div>
@@ -24,7 +25,9 @@
       <div class="throttle-bar"><div id="throttle-fill" class="throttle-fill"></div></div>
       <span id="throttle-text" class="throttle-text">—</span>
     </div>
-    <button id="btn-download" class="muted small">Download JSON</button>
+    <button id="btn-postman" class="muted small">Postman</button>
+    <button id="btn-openapi" class="muted small">OpenAPI</button>
+    <button id="btn-download" class="muted small">Spec JSON</button>
     <span id="conn" class="conn">Connected</span>
   </header>
 
