@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Products — Shopify Bridge</title>
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <h1>Shopify Bridge</h1>
+      <span class="shop-name" id="shop-name">…</span>
+      <span class="currency-badge" id="shop-currency">—</span>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="products">Products</button>
+      <a class="tab" href="api-docs.html">API Docs</a>
+      <button class="tab" data-tab="analytics">Analytics</button>
+    </nav>
+    <div class="header-spacer"></div>
+    <div id="throttle" class="throttle" title="Shopify API rate limit (per shop)">
+      <span class="throttle-label">Rate</span>
+      <div class="throttle-bar"><div id="throttle-fill" class="throttle-fill"></div></div>
+      <span id="throttle-text" class="throttle-text">—</span>
+    </div>
+    <span id="conn" class="conn">Connected</span>
+  </header>
+
+  <main>
+    <div id="view-products" class="view active" style="display:grid;gap:20px;">
+      <section class="panel">
+        <div class="search-bar">
+          <div class="field grow">
+            <label for="f-query">Search</label>
+            <input type="search" id="f-query" placeholder="title, sku, vendor, tag…" />
+          </div>
+          <div class="field">
+            <label for="f-status">Status</label>
+            <select id="f-status">
+              <option value="">Any</option>
+              <option value="ACTIVE">Active</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-vendor">Vendor</label>
+            <select id="f-vendor"><option value="">Any</option></select>
+          </div>
+          <div class="field">
+            <label for="f-type">Type</label>
+            <select id="f-type"><option value="">Any</option></select>
+          </div>
+          <div class="field">
+            <label for="f-tag">Tag</label>
+            <select id="f-tag"><option value="">Any</option></select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button id="btn-new-product">+ New product</button>
+          </div>
+        </div>
+        <div class="bulk-actions">
+          <select id="bulk-action">
+            <option value="">Bulk action…</option>
+            <option value="status:ACTIVE">Set active</option>
+            <option value="status:DRAFT">Set draft</option>
+            <option value="status:ARCHIVED">Set archived</option>
+            <option value="delete">Delete</option>
+          </select>
+          <button id="btn-bulk-apply" class="muted">Apply</button>
+          <span style="flex:1"></span>
+          <div class="field" style="min-width:160px;">
+            <label for="f-sort">Sort</label>
+            <select id="f-sort">
+              <option value="UPDATED_AT:desc" selected>Updated (newest)</option>
+              <option value="UPDATED_AT:asc">Updated (oldest)</option>
+              <option value="CREATED_AT:desc">Created (newest)</option>
+              <option value="TITLE:asc">Title A→Z</option>
+              <option value="TITLE:desc">Title Z→A</option>
+              <option value="INVENTORY_TOTAL:desc">Inventory (high)</option>
+              <option value="INVENTORY_TOTAL:asc">Inventory (low)</option>
+            </select>
+          </div>
+          <div class="field" style="min-width:100px;">
+            <label for="f-pagesize">Per page</label>
+            <select id="f-pagesize">
+              <option>10</option>
+              <option selected>25</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+          </div>
+        </div>
+        <div id="list-status" class="status"></div>
+        <div id="products-table-wrap"></div>
+        <div class="pagination">
+          <span class="muted-text" id="page-meta"></span>
+          <button id="page-prev" class="muted" disabled>Prev</button>
+          <button id="page-next" class="muted" disabled>Next</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="view-analytics" class="view" style="display:none;">
+      <section class="panel">
+        <h2>Rate Limit Usage</h2>
+        <div class="row-actions">
+          <button type="button" id="ana-refresh" class="muted">Refresh now</button>
+          <span id="ana-meta" style="color: var(--muted); font-size: 12px;"></span>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label">Available</div><div class="kpi-value" id="kpi-available">—</div></div>
+          <div class="kpi"><div class="kpi-label">Bucket Max</div><div class="kpi-value" id="kpi-max">—</div></div>
+          <div class="kpi"><div class="kpi-label">Restore /s</div><div class="kpi-value" id="kpi-restore">—</div></div>
+          <div class="kpi"><div class="kpi-label">Total Calls</div><div class="kpi-value" id="kpi-calls">—</div></div>
+          <div class="kpi"><div class="kpi-label">Total Cost</div><div class="kpi-value" id="kpi-cost">—</div></div>
+          <div class="kpi"><div class="kpi-label">Total Requested</div><div class="kpi-value" id="kpi-requested">—</div></div>
+          <div class="kpi"><div class="kpi-label">Avg Latency</div><div class="kpi-value" id="kpi-latency">—</div></div>
+          <div class="kpi"><div class="kpi-label">Bucket %</div><div class="kpi-value" id="kpi-pct">—</div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Bucket Over Time</h2>
+        <svg id="spark" class="spark" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+      </section>
+
+      <section class="panel">
+        <h2>Cost By Operation</h2>
+        <div id="ops-table"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Recent Calls</h2>
+        <div id="history-table"></div>
+      </section>
+    </div>
+  </main>
+
+  <style>
+    .view { display: none; }
+    .view.active { display: grid; gap: 20px; }
+  </style>
+  <script src="js/common.js"></script>
+  <script src="js/list.js"></script>
+</body>
+</html>
