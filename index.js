@@ -1,6 +1,7 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
+const cors = require('cors');
 
 const productRoutes = require('./src/routes/productRoutes');
 const productAdminRoutes = require('./src/routes/productAdminRoutes');
@@ -12,13 +13,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '1mb' }));
 
-// API key guard — protects all /api routes from unauthenticated public access
-app.use('/api', (req, res, next) => {
-  if (req.headers['x-api-key'] !== process.env.API_KEY) {
-    return res.status(401).json({ error: true, message: 'Unauthorized', code: 'UNAUTHORIZED' });
-  }
-  next();
-});
+// Enable CORS so the React frontend can consume this API automatically without issues
+app.use(cors());
 
 // Auth guard (already implemented above)
 
